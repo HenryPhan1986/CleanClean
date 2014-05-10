@@ -24,7 +24,7 @@ class UDPClient
          System.out.println("YOU SENT ME FALSE. SADFACE!!");
       }
 
-      //System.out.println("FROM SERVER:" + modifiedSentence);
+          //System.out.println("FROM SERVER:" + modifiedSentence);
       clientSocket.close();
    }
 }
