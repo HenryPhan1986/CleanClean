@@ -37,21 +37,15 @@ class UDPClient
       DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
       clientSocket.receive(receivePacket);
       String modifiedSentence = new String(receivePacket.getData());
-      System.out.println("FROM SERVER:" + modifiedSentence);
 
-    }catch (SocketTimeoutException e) {
-                // timeout exception.
-                System.out.println("Timeout reached!!! " + e);
-            }
-
-    /*  if (modifiedSentence.contains("true")){
+      if (modifiedSentence.contains("true")){
          System.out.println("YOU SENT ME TRUE");
       }else{
          System.out.println("YOU SENT ME FALSE. SADFACE!!");
-      }*/
-   
-     // clientSocket.close();
       }
-
+    }catch (SocketTimeoutException e) {
+         System.out.println("Timeout reached!!! " + e);
+        }
+      }
    }
 }
