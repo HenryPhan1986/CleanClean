@@ -8,7 +8,7 @@ class UDPClient
       BufferedReader inFromUser =
          new BufferedReader(new InputStreamReader(System.in));
       DatagramSocket clientSocket = new DatagramSocket();
-      InetAddress IPAddress = InetAddress.getByName("localhost");
+      InetAddress IPAddress = InetAddress.getByName("192.168.43.160");
       byte[] sendData = new byte[1024];
       byte[] receiveData = new byte[1024];
       String sentence = inFromUser.readLine();
@@ -18,7 +18,13 @@ class UDPClient
       DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
       clientSocket.receive(receivePacket);
       String modifiedSentence = new String(receivePacket.getData());
-      System.out.println("FROM SERVER:" + modifiedSentence);
+      if (modifiedSentence.contains("true")){
+         System.out.println("YOU SENT ME TRUE");
+      }else{
+         System.out.println("YOU SENT ME FALSE. SADFACE!!");
+      }
+
+      //System.out.println("FROM SERVER:" + modifiedSentence);
       clientSocket.close();
    }
 }
