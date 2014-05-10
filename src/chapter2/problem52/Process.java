@@ -5,10 +5,10 @@ import java.util.Random;
 
 public class Process {
 
-	private int lambda;
+	protected int lambda;
     private boolean collision;
 	private double totalTime;
-    private Random r; 
+    protected Random r; 
     
     public Process(int lambda) {
         this.lambda = lambda;
@@ -22,8 +22,8 @@ public class Process {
     	return this;
     }
 
-    public void calculateTimeToRun() {
-        totalTime += - (lambda * (Math.log(r.nextDouble())));
+    public double calculateTimeToRun() {
+    	return totalTime += - (lambda * (Math.log(r.nextDouble())));
     }
     
     public static Comparator<Process> totalCountComparator() {
