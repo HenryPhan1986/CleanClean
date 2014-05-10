@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 
 import chapter2.problem52.Process;
 
@@ -63,28 +64,35 @@ class UDPClient extends Process {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				DatagramSocket clientSocket = null;
+				long tPackSent, tPackRecieved;
+				long totalDelay = 0;
+				int success = 0;
 				try { 
 					clientSocket = new DatagramSocket();
 					InetAddress IPAddress = InetAddress
 							.getByName(ipField.getText());
 					byte[] sendData = new byte[1024];
 					byte[] receiveData = new byte[1024];
-					int success = 0;
+					
 
+									
 					UDPClient p = new UDPClient((Integer) lambdaBox
 							.getSelectedItem());
 					long startTime = System.currentTimeMillis();
+					
 					while ((System.currentTimeMillis() - startTime) <= MAX_TIME) {
 
 						try {
 							sendData = ("" + success).getBytes();
 							DatagramPacket sendPacket = new DatagramPacket(
 									sendData, sendData.length, IPAddress, 9876);
+							tPackSent = System.currentTimeMillis(); // For Delay
 							clientSocket.send(sendPacket);
 							clientSocket.setSoTimeout(1000);
 							DatagramPacket receivePacket = new DatagramPacket(
 									receiveData, receiveData.length);
 							clientSocket.receive(receivePacket);
+							tPackRecieved = System.currentTimeMillis(); // For Delay
 							String modifiedSentence = new String(receivePacket
 									.getData());
 
@@ -96,6 +104,7 @@ class UDPClient extends Process {
 								success++;
 								Thread.sleep(time / 1000000,
 										(int) (time % 1000000));
+								totalDelay += tPackRecieved - tPackSent;
 							} else {
 								System.out
 										.println("YOU SENT ME FALSE. SADFACE D= !!");
@@ -113,6 +122,10 @@ class UDPClient extends Process {
 				} finally {
 					if (clientSocket != null)
 						clientSocket.close();
+					double thruput = ((double)success)/(5000);
+					double avgDelay = (totalDelay/(double)success)/0.8f;
+					System.out.printf("\nLambda: %d ThruPut: %f AvgDelay: %f\n", (int)lambdaBox.getSelectedItem(), thruput, avgDelay);
+
 				}
 			}
 		});
