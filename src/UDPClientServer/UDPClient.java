@@ -78,15 +78,15 @@ class UDPClient extends Process
 					{
 						System.out.println("YOU SENT ME TRUE " + success);
 						p.resetNumCols();
-						int time = (int) (p.calculateTimeToRun() * UDPServer.SLOT_TIME_NANOS);
+						long time = (long) (p.calculateTimeToRun() * UDPServer.SLOT_TIME_NANOS);
 						success++;
-						Thread.sleep(time/1000000, time%1000000);
+						Thread.sleep(time/1000000, (int)(time%1000000));
 					} else
 					{
 						System.out.println("YOU SENT ME FALSE. SADFACE D= !!");
 						p.incNumCols();
-						int BOTime = (int) (p.calculateBackOffTime() * UDPServer.SLOT_TIME_NANOS);
-						Thread.sleep(BOTime/1000000, BOTime%1000000);
+						long BOTime = (long) (p.calculateBackOffTime() * UDPServer.SLOT_TIME_NANOS);
+						Thread.sleep(BOTime/1000000, (int)(BOTime%1000000));
 					}
 				} catch (SocketTimeoutException e)
 				{
