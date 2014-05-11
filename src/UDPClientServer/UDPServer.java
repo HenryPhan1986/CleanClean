@@ -5,8 +5,10 @@ import java.net.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 class UDPServer {
-	private static final ReentrantLock lock = new ReentrantLock();
+	private static final ReentrantLock lock1 = new ReentrantLock();
+	private static final ReentrantLock lock2 = new ReentrantLock();
 	public static final int SLOT_TIME_NANOS = 800000;
+	private static Boolean collision = false;
 	private static DatagramSocket serverSocket;
 	static {
 		try {
@@ -27,32 +29,37 @@ class UDPServer {
 			final int port = receivePacket.getPort();
 			final String sentence = new String(receivePacket.getData());
 
-			System.out.println("RECEIVED: "
+			System.out.println("(" + IPAddress.getHostAddress() + ")RECEIVED: "
 					+ sentence.substring(0, sentence.indexOf('\0')));
 
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						if (lock.isLocked()) {
-							lock.lockInterruptibly();
+						if (lock1.tryLock()) {
 							Thread.sleep(0, SLOT_TIME_NANOS);
-							lock.unlock();
-							sendCollision(IPAddress, port, sentence);
-						} else {
-							lock.lockInterruptibly();
-							Thread.sleep(0, SLOT_TIME_NANOS);
-							lock.unlock();
+							if (lock2.isLocked()) {
+								while (lock2.isLocked()) {}
+								lock1.unlock();
+								sendCollision(IPAddress, port, sentence);
+								return;
+							}
+							lock1.unlock();
 							sendSuccess(IPAddress, port, sentence);
+						} else {
+							lock2.lock();
+							Thread.sleep(0, SLOT_TIME_NANOS);
+							lock2.unlock();
+							sendCollision(IPAddress, port, sentence);
 						}
-					}
-					catch (InterruptedException ie) {
-						while (lock.isLocked()) { }
-						sendCollision(IPAddress, port, sentence);
 					}
 					catch (Exception e) {
 						e.printStackTrace();
-						if (lock.isHeldByCurrentThread())
-							lock.unlock();
+						if (lock1.isHeldByCurrentThread()) {
+							lock1.unlock();
+						}
+						if (lock2.isHeldByCurrentThread()) {
+							lock2.unlock();
+						}
 					}
 				}
 			}).start();
@@ -61,7 +68,7 @@ class UDPServer {
 
 	public static void sendCollision(InetAddress IPAddress, int port,
 			String message) {
-		String sentence = "FALSE";
+		String sentence = "(" + IPAddress.getHostAddress() + ")FALSE";
 		System.out.println(sentence + ": " + message.substring(0, message.indexOf('\0')));
 		DatagramPacket sendPacket = new DatagramPacket(sentence.getBytes(),
 				sentence.length(), IPAddress, port);
@@ -74,7 +81,7 @@ class UDPServer {
 
 	public static void sendSuccess(InetAddress IPAddress, int port,
 			String message) throws IOException {
-		String sentence = "TRUE";
+		String sentence = "(" + IPAddress.getHostAddress() + ")TRUE";
 		System.out.println(sentence + ": " + message.substring(0, message.indexOf('\0')));
 		DatagramPacket sendPacket = new DatagramPacket(sentence.getBytes(),
 				sentence.length(), IPAddress, port);
